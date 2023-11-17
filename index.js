@@ -8,6 +8,11 @@ app.use(cors());
 
 const server = createServer(app);
 
+const corsOptions = {
+  origin:
+    'https://chat-app-client-i922gqt8k-vinays-projects-dae81526.vercel.app',
+};
+app.use(cors(corsOptions));
 const io = new Server(server, {
   cors: {
     origin:
