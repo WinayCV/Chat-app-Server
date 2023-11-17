@@ -9,14 +9,12 @@ app.use(cors());
 const server = createServer(app);
 
 const corsOptions = {
-  origin:
-    'https://chat-app-client-i922gqt8k-vinays-projects-dae81526.vercel.app',
+  origin: 'https://chat-app-client-murex.vercel.app',
 };
 app.use(cors(corsOptions));
 const io = new Server(server, {
   cors: {
-    origin:
-      'https://chat-app-client-i922gqt8k-vinays-projects-dae81526.vercel.app',
+    origin: 'https://chat-app-client-murex.vercel.app',
     methods: ['GET', 'POST'],
   },
 });
@@ -31,7 +29,7 @@ io.on('connection', (socket) => {
     socket.on('send_message', (data) => {
       socket.to(data.room).emit('receive_message', data);
     });
-    socket.on('disconnet', () => {
+    socket.on('disconnect', () => {
       console.log('user disconneted', socket.id);
     });
   });
