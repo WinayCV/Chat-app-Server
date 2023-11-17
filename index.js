@@ -9,13 +9,12 @@ app.use(cors());
 const server = createServer(app);
 
 const corsOptions = {
-  origin: '*',
+  origin: 'https://chat-app-client-murex.vercel.app',
 };
 app.use(cors(corsOptions));
 const io = new Server(server, {
   cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
+    origin: 'https://chat-app-client-murex.vercel.app',
   },
 });
 
@@ -38,6 +37,3 @@ io.on('connection', (socket) => {
 server.listen(3030, () => {
   console.log('Server is running on port 3030');
 });
-
-
-chat-app-client-os2u9ij73-vinays-projects-dae81526.vercel.app/:1 Access to XMLHttpRequest at 'https://chat-app-plod.onrender.com/socket.io/?EIO=4&transport=polling&t=OlSpBiC' from origin 'https://chat-app-client-os2u9ij73-vinays-projects-dae81526.vercel.app' has been blocked by CORS policy: The 'Access-Control-Allow-Origin' header has a value 'https://chat-app-clien-murex.vercel.app' that is not equal to the supplied origin.
