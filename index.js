@@ -1,35 +1,62 @@
 const express = require('express');
-const app = express();
 const cors = require('cors');
-const {createServer} = require('http');
+const http = require('http');
 const {Server} = require('socket.io');
+const {formatInTimeZone} = require('date-fns-tz');
 
-app.use(cors());
+const app = express();
 
-const server = createServer(app);
+const corsOptions = {
+  origin: 'https://chat-app-client-murex.vercel.app/', //http://localhost:3000
+};
 
-const io = new Server(server, {
+app.use(cors(corsOptions));
+
+const httpServer = http.createServer(app);
+
+const io = new Server(httpServer, {
   cors: {
-    origin: 'https://chat-app-client-murex.vercel.app/',
+    origin: 'https://chat-app-client-murex.vercel.app/', //http://localhost:3000
   },
 });
 
 io.on('connection', (socket) => {
-  console.log('connected to ', socket.id);
+  console.log(`new Socket connection: ${socket.id}`);
 
-  socket.on('join_room', (data) => {
+  socket.on('joinroom', (data) => {
     socket.join(data);
-    console.log('User connected to room', data);
+    const roomClients = io.sockets.adapter.rooms.get(data);
+    if (roomClients) {
+      const numClients = roomClients.size;
+      io.to(data).emit('receive-rooms', numClients);
+    }
+  });
 
-    socket.on('send_message', (data) => {
-      socket.to(data.room).emit('receive_message', data);
-    });
-    socket.on('disconnet', () => {
-      console.log('user disconneted', socket.id);
-    });
+  socket.on('leave-room', (data) => {
+    socket.leave(data.room);
+    const roomClients = io.sockets.adapter.rooms.get(data.room);
+    if (roomClients) {
+      const numClients = roomClients.size;
+      io.to(data.room).emit('receive-rooms', numClients);
+    }
+  });
+
+  socket.on('send-message', (data) => {
+    const zonedDate = formatInTimeZone(
+      new Date(),
+      'Asia/Kolkata',
+      'HH:mm'
+    );
+    const obj = {
+      message: data.message,
+      id: socket.id,
+      time: zonedDate,
+      name: data.name,
+    };
+    io.to(data.room).emit('receive-message', obj);
   });
 });
 
-server.listen(3030, () => {
-  console.log('Server is running on port 3030');
+httpServer.listen(3500, () => {
+  console.log('Server is running on port 3500.');
 });
