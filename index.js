@@ -12,6 +12,7 @@ const io = new Server(server, {
   cors: {
     origin:
       'https://chat-app-client-i922gqt8k-vinays-projects-dae81526.vercel.app/',
+    methods: ['GET', 'POST'],
   },
 });
 
