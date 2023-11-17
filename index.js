@@ -1,62 +1,35 @@
 const express = require('express');
-const cors = require('cors');
-const http = require('http');
-const {Server} = require('socket.io');
-const {formatInTimeZone} = require('date-fns-tz');
-
 const app = express();
+const cors = require('cors');
+const {createServer} = require('http');
+const {Server} = require('socket.io');
 
-const corsOptions = {
-  origin: 'https://chat-app-client-murex.vercel.app/', //http://localhost:3000
-};
+app.use(cors());
 
-app.use(cors(corsOptions));
+const server = createServer(app);
 
-const httpServer = http.createServer(app);
-
-const io = new Server(httpServer, {
+const io = new Server(server, {
   cors: {
-    origin: 'https://chat-app-client-murex.vercel.app/', //http://localhost:3000
+    origin: 'https://chat-app-client-murex.vercel.app/',
   },
 });
 
 io.on('connection', (socket) => {
-  console.log(`new Socket connection: ${socket.id}`);
+  console.log('connected to ', socket.id);
 
-  socket.on('joinroom', (data) => {
+  socket.on('join_room', (data) => {
     socket.join(data);
-    const roomClients = io.sockets.adapter.rooms.get(data);
-    if (roomClients) {
-      const numClients = roomClients.size;
-      io.to(data).emit('receive-rooms', numClients);
-    }
-  });
+    console.log('User connected to room', data);
 
-  socket.on('leave-room', (data) => {
-    socket.leave(data.room);
-    const roomClients = io.sockets.adapter.rooms.get(data.room);
-    if (roomClients) {
-      const numClients = roomClients.size;
-      io.to(data.room).emit('receive-rooms', numClients);
-    }
-  });
-
-  socket.on('send-message', (data) => {
-    const zonedDate = formatInTimeZone(
-      new Date(),
-      'Asia/Kolkata',
-      'HH:mm'
-    );
-    const obj = {
-      message: data.message,
-      id: socket.id,
-      time: zonedDate,
-      name: data.name,
-    };
-    io.to(data.room).emit('receive-message', obj);
+    socket.on('send_message', (data) => {
+      socket.to(data.room).emit('receive_message', data);
+    });
+    socket.on('disconnet', () => {
+      console.log('user disconneted', socket.id);
+    });
   });
 });
 
-httpServer.listen(3500, () => {
-  console.log('Server is running on port 3500.');
+server.listen(3030, () => {
+  console.log('Server is running on port 3030');
 });
